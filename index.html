@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>InovaCloset – Etiqueta Digital</title>
+  <style>
+    /* =============================================
+       VARIÁVEIS – edite aqui para mudar as cores
+       ============================================= */
+    :root {
+      --roxo:        #5B2C8D;
+      --roxo-claro:  #7D3FB5;
+      --roxo-bg:     #F3EEF9;
+      --roxo-borda:  #D8C8EE;
+      --cinza:       #F7F7F7;
+      --texto:       #1A1A1A;
+      --texto-suave: #666666;
+      --verde:       #25D366; /* WhatsApp */
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--roxo-bg);
+      color: var(--texto);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--roxo);
+      color: white;
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header .logo-icon { font-size: 26px; }
+    header .logo-text { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+    header .logo-sub  { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+    /* ── CARD PRINCIPAL DA PEÇA ── */
+    .card-peca {
+      background: white;
+      margin: 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(91,44,141,0.10);
+    }
+
+    /* IMAGEM / PLACEHOLDER DA PEÇA */
+    .imagem-peca {
+      background: linear-gradient(135deg, var(--roxo-bg) 0%, var(--roxo-borda) 100%);
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-bottom: 1px solid var(--roxo-borda);
+    }
+    .imagem-peca .icone { font-size: 64px; }
+    .imagem-peca .dica  {
+      font-size: 12px; color: var(--roxo); margin-top: 8px;
+      background: white; padding: 4px 12px; border-radius: 20px;
+      border: 1px dashed var(--roxo);
+    }
+    /* Para usar imagem real: descomente e coloque o src abaixo */
+    /* .imagem-peca img { width: 100%; height: 100%; object-fit: cover; } */
+
+    /* INFOS DA PEÇA */
+    .infos {
+      padding: 18px 18px 12px;
+    }
+    .categoria {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--roxo); margin-bottom: 4px;
+    }
+    .nome-peca {
+      font-size: 20px; font-weight: 700; color: var(--texto); margin-bottom: 4px;
+    }
+    .preco {
+      font-size: 22px; font-weight: 800; color: var(--roxo);
+    }
+    .preco-original {
+      font-size: 14px; color: var(--texto-suave);
+      text-decoration: line-through; margin-left: 8px; font-weight: 400;
+    }
+    .ref {
+      font-size: 11px; color: var(--texto-suave); margin-top: 6px;
+    }
+
+    /* ── TAMANHOS ── */
+    .secao {
+      padding: 14px 18px;
+      border-top: 1px solid var(--cinza);
+    }
+    .secao-titulo {
+      font-size: 13px; font-weight: 700; color: var(--texto);
+      margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tamanhos {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .tam {
+      width: 42px; height: 42px;
+      border-radius: 8px; border: 2px solid var(--roxo-borda);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; user-select: none;
+      color: var(--texto);
+    }
+    .tam.disponivel:active,
+    .tam.selecionado {
+      background: var(--roxo); color: white; border-color: var(--roxo);
+    }
+    .tam.esgotado {
+      opacity: 0.35; text-decoration: line-through; cursor: not-allowed;
+    }
+    .legenda-tam {
+      font-size: 11px; color: var(--texto-suave); margin-top: 8px;
+    }
+    .legenda-tam span { color: var(--texto-suave); }
+
+    /* ── LOOKS SUGERIDOS ── */
+    .looks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .look-card {
+      background: var(--roxo-bg);
+      border-radius: 10px;
+      padding: 10px 8px 8px;
+      border: 1px solid var(--roxo-borda);
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .look-card:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 8px rgba(91,44,141,0.18);
+    }
+    .look-icone { font-size: 28px; margin-bottom: 4px; }
+    .look-nome  { font-size: 10px; font-weight: 600; color: var(--roxo); }
+    .look-desc  { font-size: 10px; color: var(--texto-suave); margin-top: 2px; line-height: 1.3; }
+
+    /* ── MODAL DE LOOK ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.aberto { display: flex; }
+    .modal {
+      background: white;
+      width: 100%; max-width: 420px;
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 32px;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-titulo { font-size: 17px; font-weight: 700; }
+    .modal-fechar {
+      font-size: 22px; cursor: pointer; color: var(--texto-suave);
+      background: none; border: none; line-height: 1;
+    }
+    .modal-look-icone { font-size: 56px; text-align: center; margin-bottom: 12px; }
+    .modal-peca-lista { list-style: none; }
+    .modal-peca-lista li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--cinza);
+      font-size: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .modal-peca-lista li:last-child { border-bottom: none; }
+    .peca-badge {
+      background: var(--roxo-bg); color: var(--roxo);
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 20px; white-space: nowrap;
+    }
+
+    /* ── BOTÕES DE AÇÃO ── */
+    .acoes {
+      padding: 14px 18px 18px;
+      display: flex; flex-direction: column; gap: 10px;
+      border-top: 1px solid var(--cinza);
+    }
+    .btn {
+      width: 100%; padding: 14px;
+      border-radius: 12px; border: none;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+      transition: opacity 0.15s;
+      text-decoration: none;
+    }
+    .btn:active { opacity: 0.85; }
+    .btn-whatsapp { background: var(--verde); color: white; }
+    .btn-secundario {
+      background: var(--roxo-bg); color: var(--roxo);
+      border: 2px solid var(--roxo-borda);
+    }
+
+    /* ── RODAPÉ ── */
+    footer {
+      text-align: center; padding: 16px;
+      font-size: 11px; color: var(--texto-suave);
+    }
+    footer strong { color: var(--roxo); }
+
+    /* ── SEÇÃO DO QR CODE (para impressão / EXPO) ── */
+    .qr-section {
+      background: white;
+      margin: 0 16px 16px;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 2px 16px rgba(91,44,141,0.10);
+    }
+    .qr-section .qr-titulo {
+      font-size: 13px; font-weight: 700; color: var(--roxo);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
+    }
+    .qr-section img { width: 140px; height: 140px; }
+    .qr-url {
+      font-size: 11px; color: var(--texto-suave);
+      margin-top: 8px; word-break: break-all;
+    }
+    .qr-instrucao {
+      font-size: 12px; color: var(--texto-suave); margin-top: 6px;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--roxo); color: white;
+      padding: 10px 20px; border-radius: 24px;
+      font-size: 13px; font-weight: 600;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 200; white-space: nowrap;
+    }
+    .toast.visivel { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     Edite: logo-text = nome da loja | logo-sub = slogan
+     ============================================================ -->
+<header>
+  <div class="logo-icon">👗</div>
+  <div>
+    <div class="logo-text">InovaCloset</div>
+    <div class="logo-sub">Etiqueta Digital Inteligente</div>
+  </div>
+</header>
+
+
+<!-- ============================================================
+     CARD DA PEÇA
+     Edite os campos marcados com "EDITAR"
+     ============================================================ -->
+<div class="card-peca">
+
+  <!-- IMAGEM DA PEÇA
+       Opção 1 (padrão): ícone decorativo com dica
+       Opção 2: substitua por <img src="URL_DA_FOTO" alt="..."> -->
+  <div class="imagem-peca">
+    <div class="icone">👔</div> <!-- EDITAR: emoji que representa a peça -->
+    <div class="dica">📸 Adicione foto da peça aqui</div>
+  </div>
+
+  <div class="infos">
+    <div class="categoria">Linha Casual</div> <!-- EDITAR: categoria -->
+    <div class="nome-peca">Camiseta Básica Gola Redonda</div> <!-- EDITAR: nome da peça -->
+    <div>
+      <span class="preco">R$ 59,90</span> <!-- EDITAR: preço atual -->
+      <span class="preco-original">R$ 79,90</span> <!-- EDITAR: ou remova esta linha -->
+    </div>
+    <div class="ref">Ref: IC-001 · Cor: Branco/Preto/Cinza</div> <!-- EDITAR -->
+  </div>
+
+  <!-- ── TAMANHOS ── -->
+  <div class="secao">
+    <div class="secao-titulo">Tamanhos disponíveis</div>
+    <div class="tamanhos" id="tamanhos">
+      <!-- EDITAR: troque "esgotado" por "disponivel" conforme o estoque -->
+      <div class="tam disponivel" onclick="selecionarTam(this)">PP</div>
+      <div class="tam disponivel" onclick="selecionarTam(this)">P</div>
+      <div class="tam disponivel selecionado" onclick="selecionarTam(this)">M</div>
+      <div class="tam disponivel" onclick="selecionarTam(this)">G</div>
+      <div class="tam esgotado">GG</div>
+      <div class="tam esgotado">XGG</div>
+    </div>
+    <div class="legenda-tam">
+      ✅ Disponível &nbsp;|&nbsp; <span>❌ Esgotado</span>
+    </div>
+  </div>
+
+  <!-- ── LOOKS SUGERIDOS ── -->
+  <div class="secao">
+    <div class="secao-titulo">✨ Looks com essa peça</div>
+    <div class="looks-grid">
+
+      <!-- LOOK 1 – EDITAR -->
+      <div class="look-card" onclick="abrirLook(0)">
+        <div class="look-icone">💼</div>
+        <div class="look-nome">Trabalho</div>
+        <div class="look-desc">Look profissional e confortável</div>
+      </div>
+
+      <!-- LOOK 2 – EDITAR -->
+      <div class="look-card" onclick="abrirLook(1)">
+        <div class="look-icone">☀️</div>
+        <div class="look-nome">Casual</div>
+        <div class="look-desc">Para o dia a dia com estilo</div>
+      </div>
+
+      <!-- LOOK 3 – EDITAR -->
+      <div class="look-card" onclick="abrirLook(2)">
+        <div class="look-icone">🎉</div>
+        <div class="look-nome">Balada</div>
+        <div class="look-desc">Sai animado sem esforço</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── BOTÕES DE AÇÃO ── -->
+  <div class="acoes">
+    <!-- EDITAR: troque o número do WhatsApp (55 + DDD + número) -->
+    <a class="btn btn-whatsapp"
+       href="https://wa.me/5575999999999?text=Oi!%20Vi%20a%20Camiseta%20Básica%20(Ref%3A%20IC-001)%20e%20quero%20saber%20mais!"
+       target="_blank">
+      💬 Falar com a loja no WhatsApp
+    </a>
+    <button class="btn btn-secundario" onclick="copiarLink()">
+      🔗 Compartilhar esta peça
+    </button>
+  </div>
+
+</div><!-- fim card-peca -->
+
+
+<!-- ============================================================
+     SEÇÃO DO QR CODE
+     (visível na página – útil para impressão de cartaz/EXPO)
+     Para esconder: adicione  style="display:none"  na div abaixo
+     ============================================================ -->
+<div class="qr-section">
+  <div class="qr-titulo">🔍 Escaneie para ver esta página</div>
+
+  <!-- QR CODE EMBUTIDO (aponta para a URL configurada no topo) -->
+  <img
+    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFICAIAAAC9dvBkAAAHUElEQVR4nO3dsZFsOxVAUT5FOmREFARCFGREQI0BrgxV6ZR091/Lnne7p1/vknFG0h+/3+8vQMtfb78B4DxhQ5CwIUjYECRsCBI2BAkbgoQNQcKGIGFDkLAhSNgQJGwIEjYECRuC/rb7D/7x939NvI/j/v2ffx55zur3nX7+rt3389rrTr//1fOr32crNgQJG4KEDUHChiBhQ5CwIUjYELQ9x145NdfdtTuHPDX//Mrzd+fG0z9/yvRc+ivf5xUrNgQJG4KEDUHChiBhQ5CwIUjYEDQ+x145NdfdtTuHPDX//Mrzd+fG0z9/yvRc+ivf5xUrNgQJG4KEDUHChiBhQ5CwIUjYEDQ+x15djr1y6u7arfPJT83Pb3k+9/Kp+fmp1+3u8crXfcWKDUHChiBhQ5CwIUjYECRsCBI2BBmfY7921e7cefX7u3PMU/PPr7xu93dP/f6pz+cVKzYECRuChA1BwoYgYUOQsCFI2BA0Psd+ba7YPT9/6udXXrd77tZ52lPn9afO/56+xytWbAgSNgQJG4KEDUHChiBhQ5CwIejYHHtqXvqa6Xn1Vz6f8tqeS3/9+2zFhiBhQ5CwIUjYECRsCBI2BAkbgoQNQePnit+6l3j6Hulb88zpe6FvnWd+ymv76m/9fYEVG4KEDUHChiBhQ5CwIUjYECRsCPrj9/vdfg/AYVZsCBI2BAkbgoQNQcKGIGFDkLAhSNgQJGwIEjYECRuChA1BwoYgYUOQsCHovwSxntyVgrb8AAAAAElFTkSuQmCC"
+    alt="QR Code InovaCloset"
+  />
+  <!-- EDITAR: troque a URL abaixo pela URL real onde a página estará hospedada -->
+  <div class="qr-url">inovacloset.github.io/produto</div>
+  <div class="qr-instrucao">Aponte a câmera do celular para o código acima</div>
+</div>
+
+
+<!-- ============================================================
+     RODAPÉ
+     ============================================================ -->
+<footer>
+  Powered by <strong>InovaCloset</strong> · Sistema de Varejo Inteligente<br>
+  QR Code + Layout Estratégico + Suporte Mensal
+</footer>
+
+
+<!-- ============================================================
+     MODAL DE LOOKS – dados editáveis no array "looks" abaixo
+     ============================================================ -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharLook(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-titulo" id="modalTitulo"></div>
+      <button class="modal-fechar" onclick="fecharModal()">×</button>
+    </div>
+    <div class="modal-look-icone" id="modalIcone"></div>
+    <ul class="modal-peca-lista" id="modalLista"></ul>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">🔗 Link copiado!</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT – edite o array "looks" para cada peça
+     ============================================================ -->
+<script>
+// ─────────────────────────────────────────────
+// LOOKS – edite aqui para cada peça da loja
+// Estrutura: { titulo, icone, itens: [ {nome, badge} ] }
+// ─────────────────────────────────────────────
+const looks = [
+  {
+    titulo: "Look Trabalho",
+    icone: "💼",
+    itens: [
+      { nome: "Camiseta Básica Branca (esta peça)",  badge: "Esta peça" },
+      { nome: "Calça Skinny Preta",                  badge: "Linha Trabalho" },
+      { nome: "Blazer Oversized Cinza",              badge: "Linha Trabalho" },
+      { nome: "Tênis Oxford Preto",                  badge: "Acessório" },
+    ]
+  },
+  {
+    titulo: "Look Casual",
+    icone: "☀️",
+    itens: [
+      { nome: "Camiseta Básica Branca (esta peça)",  badge: "Esta peça" },
+      { nome: "Bermuda Jeans Claro",                 badge: "Linha Casual" },
+      { nome: "Mochila Preta",                       badge: "Acessório" },
+      { nome: "Tênis Casual Branco",                 badge: "Acessório" },
+    ]
+  },
+  {
+    titulo: "Look Balada",
+    icone: "🎉",
+    itens: [
+      { nome: "Camiseta Básica Preta (esta peça)",   badge: "Esta peça" },
+      { nome: "Calça Cargo Khaki",                   badge: "Linha Casual" },
+      { nome: "Jaqueta Jeans Oversized",             badge: "Linha Casual" },
+      { nome: "Bota Cano Curto",                     badge: "Acessório" },
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// Funções – não precisa editar
+// ─────────────────────────────────────────────
+function selecionarTam(el) {
+  if (el.classList.contains('esgotado')) return;
+  document.querySelectorAll('.tam').forEach(t => t.classList.remove('selecionado'));
+  el.classList.add('selecionado');
+}
+
+function abrirLook(idx) {
+  const look = looks[idx];
+  document.getElementById('modalTitulo').textContent = look.titulo;
+  document.getElementById('modalIcone').textContent  = look.icone;
+  const lista = document.getElementById('modalLista');
+  lista.innerHTML = look.itens.map(item =>
+    `<li><span class="peca-badge">${item.badge}</span> ${item.nome}</li>`
+  ).join('');
+  document.getElementById('modalOverlay').classList.add('aberto');
+}
+
+function fecharLook(e) {
+  if (e.target === document.getElementById('modalOverlay')) fecharModal();
+}
+function fecharModal() {
+  document.getElementById('modalOverlay').classList.remove('aberto');
+}
+
+function copiarLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).catch(() => {});
+  const t = document.getElementById('toast');
+  t.classList.add('visivel');
+  setTimeout(() => t.classList.remove('visivel'), 2200);
+}
+</script>
+
+</body>
+</html>
